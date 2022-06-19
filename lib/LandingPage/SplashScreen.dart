@@ -8,16 +8,16 @@ class Splash extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return EasySplashScreen(
-      logo: Image.asset('assets/Fries.png'),
+      logo: Image.asset('assets/Burger.png'),
       title: const Text(
         "FastFood",
         style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.bold,
-          color: Color(0xFFFFFFB72B),
+          color: Colors.white,
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.amber,
       loadingText: Text("FastFood - Grab your food now"),
       navigator: LandingPage(),
       durationInSeconds: 5,

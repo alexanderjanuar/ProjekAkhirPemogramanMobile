@@ -16,7 +16,8 @@ final pagecontrol = PageController();
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
 
-  Widget hotdeals(String name, String gambar, String harga, Color background) {
+  Widget hotdeals(String name, String gambar, String harga, Color background,
+      Color foreground) {
     return Container(
       margin: EdgeInsets.only(left: 15.0, right: 15),
       width: 150,
@@ -30,14 +31,32 @@ class HomePage extends StatelessWidget {
               decoration: BoxDecoration(
                   image: DecorationImage(image: AssetImage(gambar)))),
           Text(name,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-          Text(harga, style: TextStyle(fontSize: 14, color: Colors.white))
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: foreground)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Text(harga,
+                  style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black,
+                      decoration: TextDecoration.lineThrough)),
+              Text(harga,
+                  style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.white60,
+                      decoration: TextDecoration.underline)),
+            ],
+          )
         ],
       ),
     );
   }
 
-  Widget featuredFood(Makanan food,Color background,String description,String description1,String description2) {
+  Widget featuredFood(Makanan food, Color background, String description,
+      String description1, String description2) {
     return Container(
       height: 150,
       width: 200,
@@ -55,8 +74,7 @@ class HomePage extends StatelessWidget {
                 width: 100,
                 decoration: BoxDecoration(
                     image: DecorationImage(
-                        image: AssetImage(food.gambar),
-                        fit: BoxFit.contain)),
+                        image: AssetImage(food.gambar), fit: BoxFit.contain)),
               ),
               SizedBox(width: 50),
               Column(
@@ -64,17 +82,19 @@ class HomePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(food.nama,
-                      style: TextStyle(
+                      style: const TextStyle(
                           letterSpacing: 2,
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.white)),
-                  Text(
+                  const Text(
                     "Crispy",
                     style: TextStyle(color: Colors.white),
                   ),
-                  Text("Flavorful", style: TextStyle(color: Colors.white)),
-                  Text("Well Seasoned", style: TextStyle(color: Colors.white)),
+                  const Text("Flavorful",
+                      style: TextStyle(color: Colors.white)),
+                  const Text("Well Seasoned",
+                      style: TextStyle(color: Colors.white)),
                 ],
               )
             ],
@@ -136,17 +156,20 @@ class HomePage extends StatelessWidget {
                 onTap: () {
                   Get.to(DetailPage(makanan: page.food[0]));
                 },
-                child: featuredFood(page.food[0],Colors.amber,"Crispy","Flavorful","Well Seasoned")),
+                child: featuredFood(page.food[0], Colors.amber, "Crispy",
+                    "Flavorful", "Well Seasoned")),
             InkWell(
                 onTap: () {
                   Get.to(DetailPage(makanan: page.food[1]));
                 },
-                child: featuredFood(page.food[1],Colors.red.shade200,"Crispy","Flavorful","Well Seasoned")),
+                child: featuredFood(page.food[1], Colors.red.shade200, "Crispy",
+                    "Flavorful", "Well Seasoned")),
             InkWell(
                 onTap: () {
                   Get.to(DetailPage(makanan: page.food[2]));
                 },
-                child: featuredFood(page.food[2],Colors.blue.shade200,"Crispy","Flavorful","Well Seasoned")),
+                child: featuredFood(page.food[2], Colors.blue.shade200,
+                    "Crispy", "Flavorful", "Well Seasoned")),
           ]),
         ),
         const SizedBox(height: 30),
@@ -178,19 +201,19 @@ class HomePage extends StatelessWidget {
                     Get.to(DetailPage(makanan: page.food[2]));
                   },
                   child: hotdeals("Hotdog", "assets/Hotdog.png", "20000",
-                      Colors.blue.shade200)),
+                      Colors.blue.shade200, Colors.blue.shade600)),
               InkWell(
                   onTap: () {
                     Get.to(DetailPage(makanan: page.food[3]));
                   },
-                  child: hotdeals(
-                      "Taco", "assets/Taco.png", "23000", Colors.red.shade200)),
+                  child: hotdeals("Taco", "assets/Taco.png", "23000",
+                      Colors.red.shade200, Colors.red.shade600)),
               InkWell(
                   onTap: () {
                     Get.to(DetailPage(makanan: page.food[4]));
                   },
                   child: hotdeals("Fries", "assets/Fries.png", "24000",
-                      Colors.yellow.shade200)),
+                      Colors.yellow.shade200, Colors.yellow.shade600)),
             ],
           ),
         )

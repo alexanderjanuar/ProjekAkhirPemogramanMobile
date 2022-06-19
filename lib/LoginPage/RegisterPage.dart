@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:pa_pemo/Controller/RegisController.dart';
+import 'package:pa_pemo/Controller/UserController.dart';
 import 'package:pa_pemo/MainPage/MainPage.dart';
+
+import '../LandingPage/Landingpage.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -12,6 +15,7 @@ class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SignInUpController signInUpController = Get.put(SignInUpController());
+    final UserController userController = Get.put(UserController());
 
     double width = Get.width;
     double height = Get.width;
@@ -73,8 +77,12 @@ class RegisterPage extends StatelessWidget {
             margin: EdgeInsets.all(20),
             height: 50,
             child: TextField(
+              keyboardType: TextInputType.phone,
+              maxLength: 11,
               controller: signInUpController.phoneController,
               decoration: InputDecoration(
+                counterText: "",
+              prefixIcon: Padding(padding: EdgeInsets.fromLTRB(15,17,15,15), child: Text('+62 ')),
                   labelText: 'Nomor Telepon',
                   labelStyle: TextStyle(fontSize: 12),
                   enabledBorder: OutlineInputBorder(
@@ -109,6 +117,7 @@ class RegisterPage extends StatelessWidget {
             margin: EdgeInsets.all(20),
             height: 50,
             child: TextField(
+              obscureText:true,
               controller: signInUpController.passwordController,
               decoration: InputDecoration(
                   labelText: 'Password',
@@ -128,6 +137,7 @@ class RegisterPage extends StatelessWidget {
             height: 50,
             child: TextField(
               controller: signInUpController.passwordConfirmController,
+              obscureText: true,
               decoration: InputDecoration(
                   labelText: 'Re type Password',
                   labelStyle: TextStyle(fontSize: 12),
@@ -151,7 +161,6 @@ class RegisterPage extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.only(top: 10),
               margin: EdgeInsets.symmetric(horizontal: 40),
-              
               width: width,
               height: height / 7,
               child: ElevatedButton(
@@ -163,37 +172,41 @@ class RegisterPage extends StatelessWidget {
                 onPressed: () async {
                   if (signInUpController.validateSignUp()) {
                     try {
-                    await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                      email: signInUpController.emailController.text.trim(),
-                      password: signInUpController.passwordController.text,
-                    );
+                      await FirebaseAuth.instance
+                          .createUserWithEmailAndPassword(
+                        email: signInUpController.emailController.text.trim(),
+                        password: signInUpController.passwordController.text,
+                      );
 
-                    var userID = FirebaseAuth.instance.currentUser!.uid;
-                    await FirebaseFirestore.instance
-                        .collection("users")
-                        .doc(userID)
-                        .set({
-                      "nama": signInUpController.nameController.text,
-                      "email": signInUpController.emailController.text,
-                      "noTelp": signInUpController.phoneController.text,
-                    });
-
-                    Get.offAll(() => MainPage());
-                  } on FirebaseAuthException catch (e) {
-                    Get.dialog(
-                      AlertDialog(
-                        content: Text(e.message!),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Get.back(),
-                            child: const Text("Tutup"),
-                          ),
-                        ],
-                      ),
-                    );
+                      var userID = FirebaseAuth.instance.currentUser!.uid;
+                      userController.uid = userID;
+                      await FirebaseFirestore.instance
+                          .collection("users")
+                          .doc(userID)
+                          .set({
+                        "nama": signInUpController.nameController.text,
+                        "email": signInUpController.emailController.text,
+                        "noTelp": signInUpController.phoneController.text,
+                      });
+                      userController.setProfile(
+                          signInUpController.nameController.text,
+                          signInUpController.emailController.text,
+                          signInUpController.phoneController.text);
+                      Get.to(() => LandingPage());
+                    } on FirebaseAuthException catch (e) {
+                      Get.dialog(
+                        AlertDialog(
+                          content: Text(e.message!),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Get.back(),
+                              child: const Text("Tutup"),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                   }
-                  }
-
                 },
                 child: Text("Daftar"),
               ),

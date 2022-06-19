@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
@@ -6,14 +7,16 @@ import 'package:get/get.dart';
 import 'package:pa_pemo/MainPage/MainPage.dart';
 
 import '../Controller/RegisController.dart';
+import '../Controller/UserController.dart';
+
+final SignInUpController signInUpController = Get.put(SignInUpController());
+final UserController userController = Get.put(UserController());
 
 class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final SignInUpController signInUpController = Get.put(SignInUpController());
-
     double width = Get.width;
     double height = Get.width;
     return Scaffold(
@@ -39,10 +42,10 @@ class LoginPage extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 50,
           ),
-          Padding(
+          const Padding(
               padding: EdgeInsets.only(left: 20),
               child: Text(
                 "Log in",
@@ -77,7 +80,6 @@ class LoginPage extends StatelessWidget {
               obscureText: true,
               controller: signInUpController.passwordController,
               decoration: InputDecoration(
-                  
                   labelText: 'Password',
                   labelStyle: TextStyle(fontSize: 12),
                   enabledBorder: OutlineInputBorder(
@@ -100,8 +102,10 @@ class LoginPage extends StatelessWidget {
                   email: signInUpController.emailController.text.trim(),
                   password: signInUpController.passwordController.text,
                 );
+                var userID = FirebaseAuth.instance.currentUser!.uid;
+                userController.setUid(userID);
 
-                Get.offAll(() => MainPage());
+                Get.to(() => MainPage());
               } on FirebaseAuthException catch (e) {
                 Get.dialog(
                   AlertDialog(
@@ -133,7 +137,7 @@ class LoginPage extends StatelessWidget {
                     color: Colors.white,
                   ),
                 )),
-          )
+          ),
         ],
       ),
     );

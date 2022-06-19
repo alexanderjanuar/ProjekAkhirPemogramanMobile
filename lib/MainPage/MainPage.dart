@@ -1,22 +1,24 @@
 import 'package:circle_nav_bar/circle_nav_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
 import 'package:pa_pemo/Controller/HomePageController.dart';
 import 'package:pa_pemo/MainPage/HomePage.dart';
 import 'package:pa_pemo/MainPage/ProfilePage.dart';
 import 'package:pa_pemo/MainPage/Riwayat.dart';
-
+import '../Controller/UserController.dart';
 import 'CatalogPage.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({Key? key}) : super(key: key);
 
+
   @override
   Widget build(BuildContext context) {
     final _pageController = PageController();
+    final UserController userController = Get.put(UserController());
+
     final page = Get.put(HomePageController());
+    
     return Scaffold(
       body: PageView(
         controller: _pageController,

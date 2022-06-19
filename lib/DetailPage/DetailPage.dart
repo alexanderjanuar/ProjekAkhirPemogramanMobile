@@ -1,14 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
-
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
+import 'package:pa_pemo/CartPage.dart/CartPage.dart';
+import 'package:pa_pemo/ImageData/ImageData.dart';
 import 'package:pa_pemo/Model/models.dart';
-
+import '../Controller/Cartcontroller.dart';
 import '../Controller/UserController.dart';
 
 class DetailPage extends StatelessWidget {
+  final cart = Get.put(Cartcontroller());
+
   final Makanan makanan;
 
   DetailPage({Key? key, required this.makanan}) : super(key: key);
@@ -43,17 +47,35 @@ class DetailPage extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
-                margin: EdgeInsets.only(top: 20, right: 20),
-                child: const Icon(Icons.shopping_cart_outlined,
-                    color: Colors.deepOrange, size: 30),
+              InkWell(
+                onTap: () {
+                  Get.to(CartPage());
+                },
+                child: Container(
+                  margin: EdgeInsets.only(top: 20, right: 20),
+                  child: const Icon(Icons.shopping_cart_outlined,
+                      color: Colors.deepOrange, size: 30),
+                ),
               )
             ],
           ),
           const SizedBox(
             height: 50,
           ),
-          Container(height: 300, child: Image.asset(makanan.gambar)),
+          Container(
+            height: 300,
+            // child: Image.asset(makanan.gambar),
+            child: FutureBuilder(
+              future: ImageData.getImageURL(makanan.gambar),
+              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasData) {
+                  return Image.network(snapshot.data!);
+                }
+                return Lottie.asset("assets/109262-loading-circles.json");
+              },
+            ),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -161,9 +183,20 @@ class DetailPage extends StatelessWidget {
                   'user': userController.uid,
                   'jumlah': 1,
                   'status': "pending",
+                  'gambar': makanan.gambar,
                 });
+
+                cart.totalHarga += makanan.harga;
+                cart.totalItem += 1;
+
+                
                 Get.dialog(AlertDialog(
-                  content: const Text("Berhasil"),
+                  elevation: 5,
+                  content:
+                      const Text("Makanan telah ditambahkan kedalam keranjang"),
+                  title: const Center(child: Text("Berhasil")),
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20.0))),
                   actions: [
                     TextButton(
                       onPressed: () => Get.back(),

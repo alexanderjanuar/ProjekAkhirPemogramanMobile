@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 
 import '../Controller/HomePageController.dart';
 import '../DetailPage/DetailPage.dart';
+import '../ImageData/ImageData.dart';
 
 class CatalogPage extends StatelessWidget {
   CatalogPage({Key? key}) : super(key: key);
@@ -10,7 +12,7 @@ class CatalogPage extends StatelessWidget {
   Widget hotdeals(String name, String gambar, String harga, Color background) {
     return Container(
       width: 150,
-      height: 170,
+      height: 190,
       child: Card(
         elevation: 5,
         color: background,
@@ -22,14 +24,26 @@ class CatalogPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-                height: 100,
-                decoration: BoxDecoration(
-                    image: DecorationImage(image: AssetImage(gambar)))),
-            Text(name,
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: Colors.white)),
+              height: 100,
+              padding: const EdgeInsets.only(left: 15),
+              child: FutureBuilder(
+              future: ImageData.getImageURL(gambar),
+              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                  return Image.network(snapshot.data!);
+                }
+                return Lottie.asset("assets/109262-loading-circles.json");
+              },
+            ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 15.0),
+              child: Text(name,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 21,
+                      color: Colors.white)),
+            ),
             SizedBox(height: 20)
           ],
         ),
@@ -63,14 +77,14 @@ class CatalogPage extends StatelessWidget {
                 onTap: () {
                   Get.to(DetailPage(makanan: page.food[2]));
                 },
-                child: hotdeals("Hotdog", "assets/Hotdog.png", "20000",
+                child: hotdeals(page.food[2].nama, page.food[2].gambar, page.food[2].harga.toString(),
                     Colors.blue.shade200)),
             InkWell(
                 onTap: () {
-                  Get.to(DetailPage(makanan: page.food[3]));
+                  Get.to(DetailPage(makanan: page.food[5]));
                 },
                 child: hotdeals(
-                    "Taco", "assets/Taco.png", "23000", Colors.red.shade200)),
+                    page.food[5].nama, page.food[5].gambar, page.food[5].harga.toString(), Colors.blue.shade200)),
           ],
         ),
         SizedBox(
@@ -81,16 +95,15 @@ class CatalogPage extends StatelessWidget {
           children: [
             InkWell(
                 onTap: () {
-                  Get.to(DetailPage(makanan: page.food[2]));
+                  Get.to(DetailPage(makanan: page.food[4]));
                 },
-                child: hotdeals("Hotdog", "assets/Hotdog.png", "20000",
-                    Colors.blue.shade200)),
+                child: hotdeals(page.food[4].nama, page.food[4].gambar, page.food[4].harga.toString(), Colors.red.shade200)),
             InkWell(
                 onTap: () {
-                  Get.to(DetailPage(makanan: page.food[3]));
+                  Get.to(DetailPage(makanan: page.food[0]));
                 },
-                child: hotdeals(
-                    "Taco", "assets/Taco.png", "23000", Colors.red.shade200)),
+                child: hotdeals(page.food[0].nama, page.food[0].gambar, page.food[0].harga.toString(),
+                    Colors.red.shade200)),
           ],
         ),
         SizedBox(
@@ -101,18 +114,19 @@ class CatalogPage extends StatelessWidget {
           children: [
             InkWell(
                 onTap: () {
-                  Get.to(DetailPage(makanan: page.food[2]));
-                },
-                child: hotdeals("Hotdog", "assets/Hotdog.png", "20000",
-                    Colors.blue.shade200)),
-            InkWell(
-                onTap: () {
                   Get.to(DetailPage(makanan: page.food[3]));
                 },
-                child: hotdeals(
-                    "Taco", "assets/Taco.png", "23000", Colors.red.shade200)),
+                child: hotdeals(page.food[3].nama, page.food[3].gambar, page.food[3].harga.toString(),
+                    Colors.yellow.shade400)),
+            InkWell(
+                onTap: () {
+                  Get.to(DetailPage(makanan: page.food[1]));
+                },
+                child: hotdeals(page.food[1].nama, page.food[1].gambar, page.food[1].harga.toString(),
+                    Colors.yellow.shade400)),
           ],
-        )
+        ),
+        const SizedBox(height: 30)
       ],
     );
   }

@@ -3,11 +3,14 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'package:pa_pemo/CartPage.dart/CartPage.dart';
 import 'package:pa_pemo/Controller/HomePageController.dart';
 import 'package:pa_pemo/DetailPage/DetailPage.dart';
 import 'package:pa_pemo/Model/models.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
+import '../ImageData/ImageData.dart';
 
 DateTime now = DateTime.now();
 final Waktu = DateTime.parse(now.toString());
@@ -16,8 +19,8 @@ final pagecontrol = PageController();
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
 
-  Widget hotdeals(String name, String gambar, String harga, Color background,
-      Color foreground) {
+  Widget hotdeals(String name, String gambar, String harga, String hargadiskon,
+      Color background, Color foreground) {
     return Container(
       margin: EdgeInsets.only(left: 15.0, right: 15),
       width: 150,
@@ -27,9 +30,18 @@ class HomePage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-              height: 100,
-              decoration: BoxDecoration(
-                  image: DecorationImage(image: AssetImage(gambar)))),
+            height: 100,
+            child: FutureBuilder(
+              future: ImageData.getImageURL(gambar),
+              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasData) {
+                  return Image.network(snapshot.data!);
+                }
+                return Lottie.asset("assets/109262-loading-circles.json");
+              },
+            ),
+          ),
           Text(name,
               style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -43,7 +55,7 @@ class HomePage extends StatelessWidget {
                       fontSize: 14,
                       color: Colors.black,
                       decoration: TextDecoration.lineThrough)),
-              Text(harga,
+              Text(hargadiskon,
                   style: const TextStyle(
                       fontSize: 14,
                       color: Colors.white60,
@@ -60,45 +72,56 @@ class HomePage extends StatelessWidget {
     return Container(
       height: 150,
       width: 200,
-      child: Card(
-          elevation: 5,
-          margin: EdgeInsets.symmetric(horizontal: 20),
+      margin: EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
           color: background,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 1,
+              blurRadius: 4,
+              offset: Offset(0, 1), // changes position of shadow
+            ),
+          ]),
+      child: Row(
+        children: [
+          SizedBox(width: 20),
+          Container(
+            width: 100,
+            child: FutureBuilder(
+              future: ImageData.getImageURL(food.gambar),
+              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasData) {
+                  return Image.network(snapshot.data!);
+                }
+                return Lottie.asset("assets/109262-loading-circles.json");
+              },
+            ),
           ),
-          child: Row(
+          SizedBox(width: 50),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(width: 20),
-              Container(
-                width: 100,
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage(food.gambar), fit: BoxFit.contain)),
+              Text(food.nama,
+                  style: const TextStyle(
+                      letterSpacing: 2,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white)),
+              const Text(
+                "Crispy",
+                style: TextStyle(color: Colors.white),
               ),
-              SizedBox(width: 50),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(food.nama,
-                      style: const TextStyle(
-                          letterSpacing: 2,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white)),
-                  const Text(
-                    "Crispy",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  const Text("Flavorful",
-                      style: TextStyle(color: Colors.white)),
-                  const Text("Well Seasoned",
-                      style: TextStyle(color: Colors.white)),
-                ],
-              )
+              const Text("Flavorful", style: TextStyle(color: Colors.white)),
+              const Text("Well Seasoned",
+                  style: TextStyle(color: Colors.white)),
             ],
-          )),
+          )
+        ],
+      ),
     );
   }
 
@@ -147,6 +170,15 @@ class HomePage extends StatelessWidget {
                   color: Colors.deepOrange, size: 30),
             )
           ]),
+        ),
+        const SizedBox(height: 30),
+        const Padding(
+          padding: const EdgeInsets.only(left: 15.0),
+          child: Text("Featured Food",
+              style: TextStyle(
+                  fontSize: 23,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black)),
         ),
         const SizedBox(height: 30),
         Container(
@@ -198,22 +230,37 @@ class HomePage extends StatelessWidget {
             children: [
               InkWell(
                   onTap: () {
-                    Get.to(DetailPage(makanan: page.food[2]));
+                    Get.to(DetailPage(makanan: page.food[0]));
                   },
-                  child: hotdeals("Hotdog", "assets/Hotdog.png", "20000",
-                      Colors.blue.shade200, Colors.blue.shade600)),
-              InkWell(
-                  onTap: () {
-                    Get.to(DetailPage(makanan: page.food[3]));
-                  },
-                  child: hotdeals("Taco", "assets/Taco.png", "23000",
-                      Colors.red.shade200, Colors.red.shade600)),
+                  child: hotdeals(
+                      page.food[0].nama,
+                      page.food[0].gambar,
+                      "32000",
+                      page.food[0].harga.toString(),
+                      Colors.blue.shade200,
+                      Colors.blue.shade600)),
               InkWell(
                   onTap: () {
                     Get.to(DetailPage(makanan: page.food[4]));
                   },
-                  child: hotdeals("Fries", "assets/Fries.png", "24000",
-                      Colors.yellow.shade200, Colors.yellow.shade600)),
+                  child: hotdeals(
+                      page.food[4].nama,
+                      page.food[4].gambar,
+                      "27000",
+                      page.food[4].harga.toString(),
+                      Colors.red.shade200,
+                      Colors.red.shade600)),
+              InkWell(
+                  onTap: () {
+                    Get.to(DetailPage(makanan: page.food[5]));
+                  },
+                  child: hotdeals(
+                      page.food[5].nama,
+                      page.food[5].gambar,
+                      "35000",
+                      page.food[5].harga.toString(),
+                      Colors.yellow.shade600,
+                      Colors.yellow.shade800)),
             ],
           ),
         )

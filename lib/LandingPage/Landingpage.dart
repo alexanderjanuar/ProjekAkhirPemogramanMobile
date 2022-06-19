@@ -5,26 +5,32 @@ import 'package:pa_pemo/LoginPage/LoginPage.dart';
 import 'package:pa_pemo/LoginPage/RegisterPage.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
+import '../Controller/Cartcontroller.dart';
+import '../Controller/HomePageController.dart';
+
 class LandingPage extends StatelessWidget {
   const LandingPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final page = Get.put(HomePageController());
+
     final _controller = PageController();
+    
 
     double width = Get.width;
     double height = Get.width;
 
-    Widget Page(String title,String animation) {
+    Widget Page(String title, String animation) {
       return Container(
-        padding: EdgeInsets.only(left: 10,bottom: 30),
+        padding: EdgeInsets.only(left: 10, bottom: 30),
         child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 "Selamat datang ke fast food",
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.grey,
                   fontSize: 12,
                 ),
@@ -37,7 +43,7 @@ class LandingPage extends StatelessWidget {
                   fontSize: 30,
                 ),
               ),
-              Lottie.asset(animation,repeat: false),
+              Lottie.asset(animation, repeat: false),
             ]),
       );
     }
@@ -49,9 +55,10 @@ class LandingPage extends StatelessWidget {
             onPageChanged: (index) {},
             controller: _controller,
             children: [
-              Page("Pesan makanan dan minuman favoritemu","assets/Food.json"),
-              Page("Lakukan pemesanan dimanapun dan kapanpun","assets/orderfood.json"),
-              Page("Beragam metode pembayaran","assets/Payment.json"),
+              Page("Pesan makanan dan minuman favoritemu", "assets/Food.json"),
+              Page("Lakukan pemesanan dimanapun dan kapanpun",
+                  "assets/orderfood.json"),
+              Page("Beragam metode pembayaran", "assets/Payment.json"),
             ],
           ),
           Container(
@@ -71,7 +78,7 @@ class LandingPage extends StatelessWidget {
           Align(
             alignment: Alignment(0, 0.70),
             child: InkWell(
-               onTap: () {
+              onTap: () {
                 Get.to(RegisterPage());
               },
               child: Container(

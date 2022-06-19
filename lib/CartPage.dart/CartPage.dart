@@ -4,16 +4,21 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pa_pemo/Controller/UserController.dart';
+import 'package:intl/intl.dart';
 
 import '../Controller/Cartcontroller.dart';
+import '../ImageData/ImageData.dart';
 
 class CartPage extends StatelessWidget {
   CartPage({Key? key}) : super(key: key);
 
+  String formattedDate =
+      DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.now());
+
   final Cartcontroller cartController = Get.put(Cartcontroller());
 
-  Widget catalogList(
-      String judul, int harga, int jumlah, Function tambah, Function kurang) {
+  Widget catalogList(String judul, int harga, int jumlah, String gambar,
+      Function tambah, Function kurang) {
     return Container(
       margin: const EdgeInsets.only(left: 25, right: 25, top: 20),
       height: 100,
@@ -30,7 +35,16 @@ class CartPage extends StatelessWidget {
           const SizedBox(
             width: 20,
           ),
-          Image.asset("assets/Burger.png"),
+          FutureBuilder(
+            future: ImageData.getImageURL(gambar),
+            builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+              if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasData) {
+                return Image.network(snapshot.data!);
+              }
+              return CircularProgressIndicator();
+            },
+          ),
           const SizedBox(
             width: 20,
           ),
@@ -103,12 +117,26 @@ class CartPage extends StatelessWidget {
     final Query kueri = user
         .where("user", isEqualTo: controller.uid)
         .where("status", isEqualTo: "pending");
+
+    FirebaseFirestore riwayatStore = FirebaseFirestore.instance;
+    CollectionReference riwayat = riwayatStore.collection("riwayat");
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.deepOrange,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.black,
+          ),
+          onPressed: () {
+            Get.back();
+          },
+        ),
+        elevation: 0,
+        backgroundColor: Colors.white,
         title: const Text(
           "Keranjang Belanja",
-          style: TextStyle(color: Colors.white70),
+          style: TextStyle(color: Colors.black),
         ),
         centerTitle: true,
       ),
@@ -123,14 +151,18 @@ class CartPage extends StatelessWidget {
                         ? Column(
                             children: snapshot.data!.docs
                                 .map(
-                                  (e) => catalogList(e.get('nama'),
-                                      e.get('harga'), e.get('jumlah'), () {
+                                  (e) => catalogList(
+                                      e.get('nama'),
+                                      e.get('harga'),
+                                      e.get('jumlah'),
+                                      e.get('gambar'), () {
                                     user.doc(e.id).update({
                                       'jumlah': e.get('jumlah') + 1,
                                     });
                                     hargaSatuan = e.get('harga');
                                     cartController.totalHarga.value +=
                                         hargaSatuan;
+                                    cartController.totalItem += 1;
                                   }, () {
                                     if (e.get('jumlah') > 1) {
                                       user.doc(e.id).update({
@@ -142,11 +174,14 @@ class CartPage extends StatelessWidget {
                                     hargaSatuan = e.get('harga');
                                     cartController.totalHarga.value -=
                                         hargaSatuan;
+                                    cartController.totalItem -= 1;
                                   }),
                                 )
                                 .toList(),
                           )
-                        : Center(child: CircularProgressIndicator(),);
+                        : Center(
+                            child: CircularProgressIndicator(),
+                          );
                   }),
               SizedBox(height: 100)
             ],
@@ -210,9 +245,10 @@ class CartPage extends StatelessWidget {
                           const Text("TAX & FEE",
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 16)),
-                          Text("Rp. ${(totalHarga * 0.1).toInt()}",
+                          Obx(() => Text(
+                              "Rp. ${(cartController.totalHarga.value * 0.1).toInt()} ",
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                                  fontWeight: FontWeight.bold, fontSize: 16))),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -227,10 +263,10 @@ class CartPage extends StatelessWidget {
                           const Text("TOTAL",
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 16)),
-                          Text(
-                              "Rp. ${totalHarga + ((totalHarga * 0.1).toInt())}",
+                          Obx(() => Text(
+                              "Rp. ${cartController.totalHarga.value + (cartController.totalHarga.value * 0.1).toInt()}",
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                                  fontWeight: FontWeight.bold, fontSize: 16))),
                         ],
                       ),
                       Container(
@@ -243,7 +279,34 @@ class CartPage extends StatelessWidget {
                             primary: Colors.amber,
                             elevation: 5.0,
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            riwayat.add({
+                              'totalHarga': (cartController.totalHarga.value +
+                                      (cartController.totalHarga.value * 0.1))
+                                  .toInt(),
+                              'totalItem': cartController.totalItem.value,
+                              'user': controller.uid,
+                              'tanggal': formattedDate,
+                            });
+                            cartController.deleteData();
+                            cartController.totalHarga.value = 0;
+
+                            Get.dialog(AlertDialog(
+                              elevation: 5,
+                              content: const Text(
+                                  "Pembayaran berhasil"),
+                              title: const Center(child: Text("Berhasil",style:TextStyle(color:Colors.green))),
+                              shape: const RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20.0))),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Get.back(),
+                                  child: const Text("Tutup"),
+                                ),
+                              ],
+                            ));
+                          },
                           child: Text("CHECKOUT"),
                         ),
                       ),
